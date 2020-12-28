@@ -18,6 +18,8 @@ public interface BookService extends Remote {
 
     public Book[] getBooks() throws RemoteException, SQLException;
     
+    public Author[] getAuthors(final int id) throws RemoteException, SQLException;
+    
     public void addBook(final Book book) throws RemoteException;
 
     public void modifyBook(final Book book) throws RemoteException;

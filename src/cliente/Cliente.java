@@ -6,7 +6,13 @@
 package cliente;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
@@ -18,14 +24,18 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import static javax.swing.SwingConstants.CENTER;
 import javax.swing.SwingUtilities;
 import rmilibraryserver.rmi.AuthorService;
 import rmilibraryserver.rmi.Book;
 import rmilibraryserver.rmi.BookAuthoryService;
 import rmilibraryserver.rmi.BookService;
+import rmilibraryserver.rmi.InstancedBook;
+import rmilibraryserver.rmi.LibraryBook;
 import rmilibraryserver.rmi.LibraryBookService;
 
 /**
@@ -34,19 +44,20 @@ import rmilibraryserver.rmi.LibraryBookService;
  */
 public class Cliente extends willy.gui.Ventana implements SwingConstants {
 
-    private final JScrollPane scroll = new JScrollPane();
+    private final JPanel scrollPanel = new JPanel(null);
+    private final JScrollPane scroll = new JScrollPane(scrollPanel);
     private final JLabel title = new JLabel("Biblioteca", CENTER);
     private final JButton addBook = new JButton("Agregar");
     private final JTextField txtSearch = new JTextField();
     private final JButton search = new JButton("Buscar");
 
-    private final CreateBook cb = new CreateBook("Crear libro", 400, 350, false);
-    private final Thread initBookCreation = new Thread(cb::mostrar);
-
     private final LibraryConnection<AuthorService> authorService;
     private final LibraryConnection<BookAuthoryService> authoryService;
     private final LibraryConnection<BookService> bookService;
     private final LibraryConnection<LibraryBookService> libraryBookService;
+
+    private final CreateBook cb;
+    private final Thread initBookCreation;
 
     public Cliente(String title, int w, int h, boolean resizable, String url) throws NotBoundException, MalformedURLException, RemoteException {
         super(title, w, h, resizable);
@@ -56,6 +67,9 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         authoryService = new LibraryConnection(url + "AuthoryService");
         bookService = new LibraryConnection(url + "BookService");
         libraryBookService = new LibraryConnection(url + "LibraryBookService");
+
+        cb = new CreateBook(this, bookService.getService(), libraryBookService.getService(), authorService.getService());
+        initBookCreation = new Thread(cb::mostrar);
     }
 
     @Override
@@ -71,24 +85,87 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         super.addComp(search);
 
         scroll.setBounds(20, 100, 460, 350);
-        scroll.setLayout(null);
+        scroll.setPreferredSize(new Dimension(460, 350));
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         super.addComp(scroll);
 
         addBook.setBounds(330, 450, 150, 30);
         super.addComp(addBook);
 
         try {
-            int i = 0;
-            for (Book book : bookService.getService().getBooks()) {
-                System.out.println(String.format("El libro es %d y el nombre es %s, de %s", book.getId(), book.getName(), book.getPublisher()));
-                final JLabel currentBookLabel = new JLabel(String.format("El libro es %d y el nombre es %s, de %s", book.getId(), book.getName(), book.getPublisher()), CENTER);
-                currentBookLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-                currentBookLabel.setBounds(20, 5 + (25 * i), 420, 20);
-                scroll.add(currentBookLabel);
-                i++;
-            }
+            displayBooks(libraryBookService.getService().getLibraryBooks());
         } catch (RemoteException | SQLException ex) {
             System.err.println("Murioooooo " + ex.getMessage());
+        }
+
+        search.addActionListener((ActionEvent ae) -> {
+            try {
+                scrollPanel.removeAll();
+                scrollPanel.repaint();
+                displayBooks(libraryBookService.getService().searchBooks(txtSearch.getText()));
+            } catch (RemoteException | SQLException ex) {
+                System.err.println(ex.getMessage());
+            }
+        });
+
+        txtSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent ke) {
+                if (txtSearch.getText().isEmpty()) {
+                    try {
+                        scrollPanel.removeAll();
+                        scrollPanel.repaint();
+                        displayBooks(libraryBookService.getService().getLibraryBooks());
+                    } catch (RemoteException | SQLException ex) {
+                        System.err.println(ex.getMessage());
+                    }
+                }
+            }
+        });
+
+        addBook.addActionListener((ActionEvent ae) -> {
+            setVisible(false);
+            SwingUtilities.invokeLater(initBookCreation);
+        });
+
+    }
+
+    private void displayBooks(InstancedBook[] books) {
+        System.out.println("cliente.Cliente.displayBooks()");
+        System.out.println(books.length);
+        int i = 0;
+        for (InstancedBook book : books) {
+
+            final JLabel currentBookLabel = new JLabel(String.format("El libro es %d y el nombre es %s, de %s", book.getBook().getId(), book.getBook().getName(), book.getBook().getPublisher()), CENTER);
+            currentBookLabel.setBounds(20, 5 + (55 * i), 420, 20);
+            scrollPanel.add(currentBookLabel);
+
+            final JButton editButton = new JButton("Editar");
+            editButton.setBounds(20, 25 + (55 * i), 100, 20);
+            scrollPanel.add(editButton);
+
+            editButton.addActionListener((ActionEvent ae) -> {
+                this.setVisible(false);
+                CreateBook cb1 = new CreateBook(this, bookService.getService(),
+                        libraryBookService.getService(), authorService.getService(), book);
+                SwingUtilities.invokeLater(cb1::mostrar);
+            });
+
+            final JButton deleteButton = new JButton("Eliminar");
+            deleteButton.setBounds(140, 25 + (55 * i), 100, 20);
+            scrollPanel.add(deleteButton);
+
+            deleteButton.addActionListener((ActionEvent ae) -> {
+                try {
+                    bookService.getService().deleteBook(book.getOnLibrary().getBookId());
+                    displayBooks(libraryBookService.getService().getLibraryBooks());
+                } catch (RemoteException | SQLException ex) {
+                    System.err.println(ex.getMessage());
+                }
+            });
+
+            i++;
         }
     }
 

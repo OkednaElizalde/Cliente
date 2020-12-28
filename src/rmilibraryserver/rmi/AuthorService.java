@@ -7,12 +7,15 @@ package rmilibraryserver.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 
 /**
  *
  * @author Willy
  */
 public interface AuthorService extends Remote {
+
+    public Author[] getAuthors() throws RemoteException, SQLException;
 
     public void addAuthor(final Author author) throws RemoteException;
 

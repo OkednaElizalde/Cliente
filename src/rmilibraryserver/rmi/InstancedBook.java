@@ -5,11 +5,13 @@
  */
 package rmilibraryserver.rmi;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Willy
  */
-public class InstancedBook {
+public class InstancedBook implements Serializable{
 
     private final LibraryBook onLibrary;
     private final Book book;
