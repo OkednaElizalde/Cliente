@@ -42,8 +42,10 @@ public class CreateBook extends willy.gui.Ventana implements SwingConstants {
 
     private final willy.gui.Ventana parent;
     private final BookService bookService;
+    private final AuthorService authorService;
     private final int action;
     private final InstancedBook editableBook;
+    
 
     private final JLabel title = new JLabel("Edición de libro", CENTER);
     private final JLabel nameLabel = new JLabel("Nombre:", LEFT);
@@ -70,6 +72,7 @@ public class CreateBook extends willy.gui.Ventana implements SwingConstants {
         super("Crear libro", 400, 370, false);
         super.getContentPane().setLayout(null);
 
+        this.authorService = authorService;
         this.parent = parent;
         this.bookService = bookService;
         this.action = 0;
@@ -82,6 +85,7 @@ public class CreateBook extends willy.gui.Ventana implements SwingConstants {
         super("Crear libro", 400, 370, false);
         super.getContentPane().setLayout(null);
 
+        this.authorService = authorService;
         this.parent = parent;
         this.bookService = bookService;
         this.action = 1;
@@ -170,6 +174,93 @@ public class CreateBook extends willy.gui.Ventana implements SwingConstants {
         okButton.setBounds(290, 340, 90, 20);
         super.addComp(okButton);
 
+        createAuthor.addActionListener((ActionEvent ae) -> {
+            String newAuthor = JOptionPane.showInputDialog(null, "Ingrese un nuevo autor", "Crear Autor", JOptionPane.PLAIN_MESSAGE);
+            if(newAuthor == null){
+               return; 
+            }            
+            try {           
+                               
+                Author[] recentlyGottenAuthors = authorService.getAuthors();
+                String[] authorNames = new String[recentlyGottenAuthors.length];
+//                int[] ids = new int[recentlyGottenAuthors.length];
+                for (int i = 0; i < authorNames.length; i++) {
+                    authorNames[i] = recentlyGottenAuthors[i].getName();
+                    if (newAuthor.equals(recentlyGottenAuthors[i].getName())) {
+                        JOptionPane.showMessageDialog(null, "El autor ingresado ya existe");
+                    }
+                }
+                authorService.addAuthor(new Author(recentlyGottenAuthors.length+1,newAuthor));
+                        
+                
+            } catch (Exception e) {
+                
+            }
+        });
+
+        addAuthor.addActionListener((ActionEvent ae) -> {
+            try {
+                Author[] recentlyGottenAuthors = authorService.getAuthors();
+                int[] ids = new int[recentlyGottenAuthors.length];
+                String[] authorNames = new String[recentlyGottenAuthors.length];
+                for (int i = 0; i < authorNames.length; i++) {
+                    authorNames[i] = recentlyGottenAuthors[i].getId() + ": " + recentlyGottenAuthors[i].getName();                                 
+                }
+
+                Object chosenObj = JOptionPane.showInputDialog(null,"Elige uno de los autores", "Elección de autores",JOptionPane.PLAIN_MESSAGE, null, authorNames, null);
+                   
+                if (chosenObj == null) {
+                    return;
+                }
+
+                String chosenString = (String) chosenObj;
+                int chosenId = Integer.valueOf(chosenString.split("\\:")[0]);
+                Author chosenAuthor = null;
+                for (Author recentlyGottenAuthor : recentlyGottenAuthors) {
+                    if (recentlyGottenAuthor.getId() == chosenId) {
+                        chosenAuthor = recentlyGottenAuthor;
+                        break;
+                    }
+                }
+
+                while (chosenAuthor == null) {
+                    chosenObj = JOptionPane.showInputDialog(null,
+                            "Ocurrió un error, vuelva a elegir uno de los autores", "Elección de autores",
+                            JOptionPane.PLAIN_MESSAGE, null, authorNames, null);
+
+                    if (chosenObj == null) {
+                        return;
+                    }
+
+                    chosenString = (String) chosenObj;
+
+                    chosenId = Integer.valueOf(chosenString.split("\\:")[0]);
+
+                    chosenAuthor = null;
+                    for (Author recentlyGottenAuthor : recentlyGottenAuthors) {
+                        if (recentlyGottenAuthor.getId() == chosenId) {
+                            chosenAuthor = recentlyGottenAuthor;
+                            break;
+                        }
+                    }
+                }
+                
+                name.setText(chosenAuthor.getName());
+                //publisher.setText(chosenAuthor.getPublisher());
+
+                Author[] authors = bookService.getAuthors(chosenId);
+
+                authorsTxt.setText("");
+                for (Author author : authors) {
+                    authorsTxt.append(author.getName() + "\n");
+                }
+                 
+        
+            } catch (RemoteException | SQLException ex) {
+                System.err.println(ex.getMessage());
+            }
+        });
+        
         borrowed.addChangeListener((ChangeEvent ce) -> {
             if (((int) borrowed.getValue()) > ((int) total.getValue())) {
                 JOptionPane.showMessageDialog(null, "No puedes prestar más libros de los que tienes");

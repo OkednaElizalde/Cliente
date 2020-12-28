@@ -10,6 +10,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+
 /**
  *
  * @author Willy
@@ -21,7 +22,10 @@ public class LibraryConnection<T> {
     private final T service;
     
     public LibraryConnection(final String URL) throws NotBoundException, MalformedURLException, RemoteException{
+        System.out.println("1");
         service = (T) Naming.lookup(URL);
+//        service = (T) Naming.lookup("//localhost/Cliente");
+        System.out.println("2");
     }
     
     public T getService(){

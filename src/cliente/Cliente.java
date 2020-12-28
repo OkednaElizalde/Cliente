@@ -5,9 +5,9 @@
  */
 package cliente;
 
-import java.awt.Color;
+
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,9 +18,7 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.BorderFactory;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -46,6 +44,7 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
 
     private final JPanel scrollPanel = new JPanel(null);
     private final JScrollPane scroll = new JScrollPane(scrollPanel);
+    private final JPanel scrollibro = new JPanel(null);
     private final JLabel title = new JLabel("Biblioteca", CENTER);
     private final JButton addBook = new JButton("Agregar");
     private final JTextField txtSearch = new JTextField();
@@ -85,9 +84,12 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         super.addComp(search);
 
         scroll.setBounds(20, 100, 460, 350);
-        scroll.setPreferredSize(new Dimension(460, 350));
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollibro.setLayout(null);
+        scrollibro.setPreferredSize(new Dimension(600,600));
+        scroll.setViewportView(scrollibro);
+//        scroll.setPreferredSize(new Dimension(460, 350));
+//        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+//        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         super.addComp(scroll);
 
         addBook.setBounds(330, 450, 150, 30);
@@ -101,8 +103,8 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
 
         search.addActionListener((ActionEvent ae) -> {
             try {
-                scrollPanel.removeAll();
-                scrollPanel.repaint();
+                scrollibro.removeAll();
+                scrollibro.repaint();
                 displayBooks(libraryBookService.getService().searchBooks(txtSearch.getText()));
             } catch (RemoteException | SQLException ex) {
                 System.err.println(ex.getMessage());
@@ -114,8 +116,8 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
             public void keyReleased(KeyEvent ke) {
                 if (txtSearch.getText().isEmpty()) {
                     try {
-                        scrollPanel.removeAll();
-                        scrollPanel.repaint();
+                        scrollibro.removeAll();
+                        scrollibro.repaint();
                         displayBooks(libraryBookService.getService().getLibraryBooks());
                     } catch (RemoteException | SQLException ex) {
                         System.err.println(ex.getMessage());
@@ -139,11 +141,11 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
 
             final JLabel currentBookLabel = new JLabel(String.format("El libro es %d y el nombre es %s, de %s", book.getBook().getId(), book.getBook().getName(), book.getBook().getPublisher()), CENTER);
             currentBookLabel.setBounds(20, 5 + (55 * i), 420, 20);
-            scrollPanel.add(currentBookLabel);
+            scrollibro.add(currentBookLabel);
 
             final JButton editButton = new JButton("Editar");
             editButton.setBounds(20, 25 + (55 * i), 100, 20);
-            scrollPanel.add(editButton);
+            scrollibro.add(editButton);
 
             editButton.addActionListener((ActionEvent ae) -> {
                 this.setVisible(false);
@@ -154,7 +156,7 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
 
             final JButton deleteButton = new JButton("Eliminar");
             deleteButton.setBounds(140, 25 + (55 * i), 100, 20);
-            scrollPanel.add(deleteButton);
+            scrollibro.add(deleteButton);
 
             deleteButton.addActionListener((ActionEvent ae) -> {
                 try {
@@ -177,5 +179,6 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         final Cliente cliente = new Cliente("Asistente de la biblioteca", 500, 500, false, url);
         final Thread t = new Thread(cliente::mostrar);
         SwingUtilities.invokeAndWait(t);
+
     }
 }

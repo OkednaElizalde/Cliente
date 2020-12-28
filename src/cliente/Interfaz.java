@@ -1,5 +1,6 @@
 package cliente;
 
+import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +23,12 @@ public class Interfaz extends JFrame {
     JLabel total;
     JLabel prestados;
     JButton agregar;
-
+    /*
+    static void main(String[] args){
+       Interfaz obj = new Interfaz();
+       obj.setVisible(true);
+      
+    }*/
     public Interfaz() {
 
         setSize(500, 500);
@@ -37,6 +43,7 @@ public class Interfaz extends JFrame {
     private void agregar() {
         panel = new JPanel();
         panel.setLayout(null);
+        
         this.getContentPane().add(panel);
         //Labels
         JLabel fondo = new JLabel();
@@ -134,6 +141,7 @@ public class Interfaz extends JFrame {
         sepa = new JSeparator();
         libro = new JPanel();
         libro.setLayout(null);
+        libro.setPreferredSize(new Dimension(600,600));
         scroll.setViewportView(libro);
         JButton edit = new JButton("Editar");
         JButton eliminar = new JButton("Eliminar");
@@ -148,7 +156,7 @@ public class Interfaz extends JFrame {
         Autor.setBounds(30, 50, 200, 20);
         Edicion.setBounds(30, 80, 200, 20);
         lbp.setBounds(30, 110, 200, 20);
-        ttl.setBounds(30, 140, 200, 20);
+        ttl.setBounds(30, 540, 200, 20);
         edit.setBounds(180, 200, 100, 20);
         eliminar.setBounds(290, 200, 100, 20);
         ///

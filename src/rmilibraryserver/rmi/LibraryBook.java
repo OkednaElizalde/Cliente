@@ -6,6 +6,7 @@
 package rmilibraryserver.rmi;
 
 import java.io.Serializable;
+import java.rmi.server.UnicastRemoteObject;
 
 /**
  *
