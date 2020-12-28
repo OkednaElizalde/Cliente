@@ -117,7 +117,7 @@ public class Interfaz extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 agregar();
             }
-        };   
+        };
         agregar.addActionListener(agre);
 
         ///add
