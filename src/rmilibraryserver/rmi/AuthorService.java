@@ -17,7 +17,7 @@ public interface AuthorService extends Remote {
 
     public Author[] getAuthors() throws RemoteException, SQLException;
 
-    public void addAuthor(final Author author) throws RemoteException;
+    public Author addAuthor(final String authorName) throws RemoteException;
 
     public void modifyAuthor(final Author author) throws RemoteException;
 
