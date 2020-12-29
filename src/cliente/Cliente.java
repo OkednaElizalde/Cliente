@@ -7,11 +7,8 @@ package cliente;
 
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -19,8 +16,6 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.util.Arrays;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,13 +26,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import static javax.swing.SwingConstants.CENTER;
 import javax.swing.SwingUtilities;
-import rmilibraryserver.rmi.Author;
 import rmilibraryserver.rmi.AuthorService;
-import rmilibraryserver.rmi.Book;
 import rmilibraryserver.rmi.BookAuthoryService;
 import rmilibraryserver.rmi.BookService;
 import rmilibraryserver.rmi.InstancedBook;
-import rmilibraryserver.rmi.LibraryBook;
 import rmilibraryserver.rmi.LibraryBookService;
 
 /**
@@ -85,10 +77,6 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         scroll.setBounds(20, 100, 460, 350);
         scrollPanel.setLayout(null);
         scrollPanel.setComponentOrientation(ComponentOrientation.UNKNOWN);
-//        scrollibro.setPreferredSize(new Dimension(600,600));
-//        scroll.setPreferredSize(new Dimension(460, 350));
-//        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-//        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         super.addComp(scroll);
 
         addBook.setBounds(330, 450, 150, 30);
@@ -157,7 +145,7 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
             for (int j = 0; j < book.getAuthors().length; j++) {
                 authorNames[j] = book.getAuthors()[j].getName();
             }
-            
+
             final String bookDescription = String.format(String.format("El libro #%d:\n"
                     + "es %s.\n"
                     + "de: %s\n"
@@ -207,8 +195,8 @@ public class Cliente extends willy.gui.Ventana implements SwingConstants {
         }
         scrollPanel.setPreferredSize(new Dimension(440, 130 * i));
     }
-    
-    public void updateBooksAndStuff() throws RemoteException, SQLException{
+
+    public void updateBooksAndStuff() throws RemoteException, SQLException {
         displayBooks(libraryBookService.getService().getLibraryBooks());
         this.setVisible(false);
         this.setVisible(true);
